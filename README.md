@@ -1,47 +1,49 @@
 # tiny-chess-01 — a 0x88 negamax engine in 4 KB
 
 `main.py` is the whole engine: **4,086 bytes**, at the 4,096 cap. Everything it needs is in its
-own bytes — no imports of repo files, no data files, standard library only.
+own bytes — no imports from repo files, no data files, no network calls except the env protocol.
 
-## What is in it
+## How the size cap is met
 
-A 0x88 board with make/unmake, a full legal-move generator (castling, en passant, all four
-promotions), and a deterministic search:
+Readable source lives outside the repo; `main.py` is produced by a build step that renames every
+identifier to a per-scope unique short name, squashes whitespace, and LZMA-compresses the result
+into a 3-line self-unpacking stub (`base85` payload + `exec(lzma.decompress(...))`). Piece-square
+tables are stored as one base85 blob instead of decimal literals — decimal PSTs are ~4 KB of
+high-entropy text that LZMA cannot compress, so they alone would blow the cap.
 
-- **iterative deepening negamax** with alpha-beta
-- **transposition table** (Zobrist keys, 64-bit, no clock)
-- **killers + history** for move ordering, MVV-LVA on captures
-- **quiescence search** so it does not stop mid-exchange
-- **null-move pruning** with a zugzwang guard
-- **tapered evaluation**: material, six piece-square tables (packed as a base85 blob), pawn
-  structure, bishop pair, rook on open file, king safety vs king activity by phase
+## Engine
 
-## Determinism
-
-The search is bounded by a **node count per move**, never by a clock, so a replay of the same
-game produces byte-identical moves. Nothing depends on `time`, `random` without a fixed seed, or
-hash ordering. That is what the replay check needs.
+* **Board**: 0x88, 128-entry array, piece codes `±1..6`.
+* **Search**: iterative-deepening negamax, alpha-beta, transposition table keyed by Zobrist hash
+  (piece/square + castling + en-passant file + **side to move**), killer moves, history
+  heuristic, check extension, quiescence with delta-style stand-pat.
+* **Eval**: material + tapered piece-square tables, half-file-mirrored (32 entries per piece).
+* **Determinism**: the search is bounded by a **fixed node count per move**, never by a clock, and
+  contains no randomness — so a replay of a trial reproduces every move exactly. This matters:
+  the rules replay the final trial and mark a mismatched run `nondeterministic`.
 
 ## Correctness
 
-Move generation is verified against the standard perft suite before anything else:
+Move generation is verified against the standard perft suite and cross-checked against
+`python-chess`, which is a stronger test than counting leaves alone — `tools/divide.py` descends
+until a node's legal-move set disagrees and prints the exact extra/missing moves.
 
-```
-start     depth 4   197,281
-kiwipete  depth 3    97,862
-pos3      depth 4    43,238
-pos4      depth 3     9,467
-pos5      depth 3    62,379
-```
+| position | depth | nodes |
+|---|---|---|
+| start | 4 | 197,281 |
+| Kiwipete | 3 | 97,862 |
+| pos3 | 4 | 43,238 |
+| pos4 | 3 | 9,467 |
+| pos5 | 3 | 62379 |
 
-Plus a divide walk against `python-chess`: at every node down to depth 3 the legal move lists are
-compared as sorted sequences (not sets, so a duplicated move cannot hide). All six positions agree
-exactly.
+## Local harness
 
-## Size
+The env in the kit is playable without Docker: `tools/trial.py` boots `program/env/server.mjs`,
+points the engine at it, and reports the Elo the env itself computes over the eight house engines.
+`tools/play.py` does the same but records every game's outcome and FEN, which is how the PST
+orientation bug (tables read upside-down: the king was paid to march to h5, pawns paid to stay
+home) was found — visible as 0/6 losses even at 150k nodes per move.
 
-The readable source is minified (identifiers renamed and checked for scope collision), LZMA-packed,
-and base85-encoded; the unpacker is the first line of `main.py`. The packer searches LZMA filter
-parameters for the smallest payload rather than taking the first result.
+## License
 
-MIT licensed.
+MIT. See `LICENSE`.
