@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 [![reward](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-A chess engine in **3,877 bytes** of Python — `main.py` is `engine_v3.py` packed with the kit's own
+A chess engine in **3,946 bytes** of Python — `main.py` is `engine_v3.py` packed with the kit's own
 `makefun compress`, inside a 4,096-byte cap and pure standard library.
 
 0x88 board, iterative-deepening alpha-beta with a transposition table, null-move pruning, late-move
@@ -17,7 +17,8 @@ Search is budgeted by **220,000 nodes, never a wall clock**: same FEN in, same m
 ## Verified
 
 - perft: start `20 / 400 / 8,902`, kiwipete `48 / 2,039`.
-- `main.py`'s decompressed payload is byte-identical to `engine_v3.py`.
+- `main.py` is 3,946 bytes, sha256 `9abf5e197b0808cf0b61747d82a3345abbadf52b7db2ba956897efed7fa0cc54`,
+  and its decompressed payload is byte-identical to `engine_v3.py`.
 - Kit practice trial-0, sealed env and scorer: **4 wins, 2 draws, 0 losses (5.0/6), Elo 1654**;
   draws against the 250k- and 500k-node house engines; slowest sampled move 6.1 s against a 10 s cap.
 
