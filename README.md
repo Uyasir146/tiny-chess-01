@@ -1,14 +1,35 @@
-# tiny-chess-01 — a 0x88 negamax engine in 4 KB
+# tiny-chess-01 — a 0x88 negamax engine in under 4 KB
 
-`main.py` is the whole engine: **4,086 bytes**, at the 4,096 cap. Everything it needs is in its
-own bytes — no imports from repo files, no data files, no network calls except the env protocol.
+[![make.fun · tiny-chess-01](https://make.fun/badge/tiny-chess-01.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![rank](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![reward](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+
+An entry for the [tiny-chess-01](https://make.fun/bounty/tiny-chess-01) bounty on
+[make.fun](https://make.fun): a whole chess engine in one file, `main.py`, **3,796 bytes**
+(cap: 4,096). Everything it needs is in its own bytes — no imports from repo files, no data files,
+no network calls except the env protocol.
+
+## Run it
+
+`main.py` speaks the kit's env protocol: it reads `MAKEFUN_ENV_URL`, asks for the position, and
+plays until the game ends. With the competition kit unpacked next to this repo:
+
+```sh
+MAKEFUN_ENV_URL=http://127.0.0.1:3000 python main.py
+```
+
+`main.py` is generated, not hand-edited. The readable source lives outside the repo and is packed
+with the kit's own compressor, which LZMA-compresses it into a self-unpacking stub:
+
+```sh
+node cli/makefun.mjs compress engine.py --out main.py
+```
 
 ## How the size cap is met
 
-Readable source lives outside the repo; `main.py` is produced by a build step that renames every
-identifier to a per-scope unique short name, squashes whitespace, and LZMA-compresses the result
-into a 3-line self-unpacking stub (`base85` payload + `exec(lzma.decompress(...))`). Piece-square
-tables are stored as one base85 blob instead of decimal literals — decimal PSTs are ~4 KB of
+The readable source (~12 KB of Python) is renamed to per-scope unique short names, squashed, and
+LZMA-compressed into a small self-unpacking stub (`base85` payload + `exec(lzma.decompress(...))`).
+Piece-square tables ship as one base85 blob instead of decimal literals — decimal PSTs are ~4 KB of
 high-entropy text that LZMA cannot compress, so they alone would blow the cap.
 
 ## Engine
@@ -16,7 +37,7 @@ high-entropy text that LZMA cannot compress, so they alone would blow the cap.
 * **Board**: 0x88, 128-entry array, piece codes `±1..6`.
 * **Search**: iterative-deepening negamax, alpha-beta, transposition table keyed by Zobrist hash
   (piece/square + castling + en-passant file + **side to move**), killer moves, history
-  heuristic, check extension, quiescence with delta-style stand-pat.
+  heuristic, check extension, quiescence with delta-style stand-pat and a depth cap.
 * **Eval**: material + tapered piece-square tables, half-file-mirrored (32 entries per piece).
 * **Determinism**: the search is bounded by a **fixed node count per move**, never by a clock, and
   contains no randomness — so a replay of a trial reproduces every move exactly. This matters:
@@ -34,7 +55,7 @@ until a node's legal-move set disagrees and prints the exact extra/missing moves
 | Kiwipete | 3 | 97,862 |
 | pos3 | 4 | 43,238 |
 | pos4 | 3 | 9,467 |
-| pos5 | 3 | 62379 |
+| pos5 | 3 | 62,379 |
 
 ## Local harness
 
