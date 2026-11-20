@@ -24,6 +24,10 @@ Search is budgeted by **140,000 nodes, never a wall clock**: same FEN in, same m
   move-identical replay; slowest sampled move 3.3 s against a 10 s cap.
 - Every request path is retried, never fatal: the engine keeps playing even if one call fails, and
   falls back to the env's own legal move list if a search ever returns nothing.
+- The engine keeps the whole game's position history in memory, so a repeated position is scored as
+  a draw and the search will not walk into a threefold repetition; this is what turned two drawn
+  games into wins. The history is cleared when the env reports a different game, so games cannot
+  contaminate each other.
 
 ## Run it
 
