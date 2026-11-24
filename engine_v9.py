@@ -270,6 +270,7 @@ class P:
     if bb > 1:
       r -= 32
     return (r if self.side > 0 else -r) + 8
+
   def ab(self, d, al, be, ply):
     b = self.b
     self.nodes += 1
