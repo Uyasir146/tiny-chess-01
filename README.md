@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 [![reward](https://make.fun/badge/tiny-chess-01/Uyasir146/tiny-chess-01/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-A chess engine in **4,071 bytes** of Python — `main.py` is `engine_v7.py` packed with the kit's own
+A chess engine in **4,091 bytes** of Python — `main.py` is `engine_v9.py` packed with the kit's own
 `makefun compress`, inside a 4,096-byte cap and pure standard library.
 
 0x88 board, iterative-deepening alpha-beta with a transposition table, null-move pruning, late-move
@@ -19,9 +19,10 @@ Search is budgeted by **140,000 nodes, never a wall clock**: same FEN in, same m
 ## Verified
 
 - perft: start `20 / 400 / 8,902`, kiwipete `48 / 2,039`.
-- `main.py` is 4,071 bytes and its decompressed payload is byte-identical to `engine_v7.py`.
-- Kit practice trial-0, sealed env and scorer: **5 wins, 1 draw, 0 losses (5.5/6), Elo 1809**, 535 spare plies, no timeout and a
-  move-identical replay; slowest sampled move 3.3 s against a 10 s cap.
+- `main.py` is 4,091 bytes and its decompressed payload is byte-identical to `engine_v9.py`.
+- Kit practice trial-0, sealed env and scorer: **6 wins, 0 draws, 0 losses (6/6), Elo 2112**, the
+  competition's ceiling, 473 spare plies, no timeout and a move-identical replay; every game won by
+  checkmate, nodes-500k among them with black in 80 moves, slowest sampled move 3.0 s against a 10 s cap.
 - Every request path is retried, never fatal: the engine keeps playing even if one call fails, and
   falls back to the env's own legal move list if a search ever returns nothing.
 - The engine keeps the whole game's position history in memory, so a repeated position is scored as
