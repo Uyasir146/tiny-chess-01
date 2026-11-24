@@ -338,7 +338,7 @@ class P:
       if n == 1:
         v = -self.ab(d - 1, -be, -al, ply + 1)
       else:
-        r = 1 if (d > 2 and n > 3 and quiet and not chk) else 0
+        r = 2 if (d > 3 and n > 6 and quiet and not chk) else (1 if (d > 2 and n > 3 and quiet and not chk) else 0)
         v = -self.ab(d - 1 - r, -al - 1, -al, ply + 1)
         if v > al and (r or v < be):
           v = -self.ab(d - 1, -be, -al, ply + 1)
